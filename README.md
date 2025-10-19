@@ -1,1 +1,37 @@
 # Proyecto_Estadistica_migraciones
+
+
+```{r}
+library(rio)
+library(dplyr)
+```
+
+```{r}
+Migraciones = import("Migraciones_2024.xlsx")
+```
+
+```{r}
+str(Migraciones)
+```
+
+
+```{r}
+mediaPBI = mean(Migraciones$PBI_en_Dólares_2024,na.rm = TRUE)
+```
+
+```{r}
+mediaESTPOL = mean(Migraciones$`Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`, na.rm = TRUE)
+```
+
+
+```{r}
+Migraciones = Migraciones %>%
+  mutate(PBI_en_Dólares_2024 = case_when(is.na(PBI_en_Dólares_2024)~mediaPBI,
+                                         TRUE ~ PBI_en_Dólares_2024))
+```
+
+```{r}
+Migraciones = Migraciones %>%
+  mutate(`Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023` = case_when(is.na(`Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`)~mediaESTPOL,
+                                                                                         TRUE ~ `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`))
+```

@@ -16,38 +16,532 @@ PBI_en_Dólares_2024 (Variable Numérica Continua): Mide, en el año 2024, en d�
 Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023 (Variable Numérica Continua): Mide en porcentaje, durante el año 2023, la estabilidad política y la ausencia de violencia dentro del país analizado. 
 
 
+---
+title: "Entrega Final"
+output: html_document
+date: "2025-11-29"
+---
 
-```{r}
+```{r Librerías}
 library(rio)
 library(dplyr)
+
 ```
 
-```{r}
+```{r Importar la Data}
 Migraciones = import("Migraciones_2024.xlsx")
 ```
 
-```{r}
+```{r STR}
 str(Migraciones)
 ```
 
-
-```{r}
+```{r Media de PBI}
 mediaPBI = mean(Migraciones$PBI_en_Dólares_2024,na.rm = TRUE)
 ```
 
-```{r}
+```{r Media de Estabilidad Política}
 mediaESTPOL = mean(Migraciones$`Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`, na.rm = TRUE)
 ```
 
 
-```{r}
+```{r Completar Casos de PBI}
 Migraciones = Migraciones %>%
   mutate(PBI_en_Dólares_2024 = case_when(is.na(PBI_en_Dólares_2024)~mediaPBI,
                                          TRUE ~ PBI_en_Dólares_2024))
 ```
 
-```{r}
+```{r Completar Casos de Estabilidad Política}
 Migraciones = Migraciones %>%
   mutate(`Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023` = case_when(is.na(`Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`)~mediaESTPOL,
                                                                                          TRUE ~ `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`))
 ```
+
+
+```{r Librería Regresiones}
+library(lmtest)
+library(car)
+```
+
+
+
+### Regresión Gaussiana Migraciones Netas
+
+```{r Gaussiana Migraciones Netas}
+Gaussiana = lm(`Migración_Neta_2024_(En_número_de_personas)` ~ 
+                             `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024` + `PBI_en_Dólares_2024` + 
+                             `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`, 
+                           data = Migraciones)
+
+summary(Gaussiana)
+```
+
+    Evaluando la regresión:
+                            Linealidad:
+                            
+```{r Linealidad Migraciones}
+plot(Gaussiana, 1)
+
+mean(Gaussiana$residuals)
+```
+    
+                            Homocedasticidad:
+                            
+```{r Homocedasticidad Migraciones}
+plot(Gaussiana, 3)
+
+bptest(Gaussiana)
+```
+                            
+                            
+                            Normalidad de los residuos:
+                            
+```{r Normalidad de Residuos Migraciones}
+plot(Gaussiana, 2)
+
+shapiro.test(Gaussiana$residuals)
+```
+                            
+                            No multicolinealidad:
+                            
+```{r No Multicolinealidad Migraciones}
+vif(Gaussiana)
+```
+                            
+                            
+                            Valores influyentes:
+
+```{r Valores Influyentes Migraciones}
+plot(Gaussiana, 5)
+```
+
+Regresión Gaussiana Inactividad de Trabajo
+
+```{r Regresión Gaussiana de Inactividad para el Trabajo}
+GaussianaTrabajo = lm(`Inactividad_de_PoblaciónApta_Trabajo_en_%_2024` ~ `Migración_Neta_2024_(En_número_de_personas)` + `PBI_en_Dólares_2024` +   `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023` , data = Migraciones)
+
+summary(GaussianaTrabajo)
+```
+    Evaluando la regresión:
+                            Linealidad:
+                            
+```{r Linealidad InacTrabajo}
+plot(GaussianaTrabajo, 1)
+
+mean(GaussianaTrabajo$residuals)
+```
+
+ 
+                            Homocedasticidad:
+                            
+```{r Homocedasticidad InacTrabajo}
+plot(GaussianaTrabajo, 3)
+
+bptest(GaussianaTrabajo)
+```
+
+ 
+                            Normalidad de los residuos:
+                            
+```{r Normalidad de Residuos InacTrabajo}
+plot(GaussianaTrabajo, 2)
+
+shapiro.test(GaussianaTrabajo$residuals)
+```
+
+
+   No multicolinealidad:
+                            
+```{r No Multicolinealidad InacTrabajo}
+vif(GaussianaTrabajo)
+```
+                            
+                            
+                            Valores influyentes:
+
+```{r Valores Influyentes InacTrabajo}
+plot(GaussianaTrabajo, 5)
+```
+
+ Gaussiana de PBI en Dólares
+
+
+```{r Regresión PBI}
+GaussianaPBI = lm(`PBI_en_Dólares_2024` ~ `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024` +  `Migración_Neta_2024_(En_número_de_personas)` + `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`, data = Migraciones)
+
+summary(GaussianaPBI)
+```
+ Evaluando la regresión:
+                            Linealidad:
+                            
+```{r Linealidad PBI}
+plot(GaussianaPBI, 1)
+
+mean(GaussianaPBI$residuals)
+```
+              Homocedasticidad:
+              
+```{r Homocedasticidad PBI}
+plot(GaussianaPBI, 3)
+
+bptest(GaussianaPBI)
+```
+              
+              
+              Normalidad de los residuos:
+              
+```{r Normalidad de Residuos PBI}
+plot(GaussianaPBI, 2)
+
+shapiro.test(GaussianaPBI$residuals)
+```
+              
+              
+              No multicolinealidad:
+              
+```{r No multicolinealidad PBI}
+vif(GaussianaPBI)
+```
+              
+              
+              Valores influyentes:
+
+```{r Valores Inlfuyentes PBI}
+plot(GaussianaPBI, 5)
+```
+
+ Gaussiana de Porcentaje de Estabilidad Política 
+
+```{r Regresión Gaussiana Estabilidad Política}
+GaussianaEstPol = lm(`Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023` ~ `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024` +  `Migración_Neta_2024_(En_número_de_personas)` + `PBI_en_Dólares_2024`, data = Migraciones)
+
+summary(GaussianaEstPol)
+```
+
+
+ Evaluando la regresión:
+                            Linealidad:
+                            
+```{r Linealidad Estabilidad Política}
+plot(GaussianaEstPol, 1)
+
+mean(GaussianaEstPol$residuals)
+```
+
+                Homocedasticidad:
+                
+```{r Homocedasticidad Estabilidad Política}
+plot(GaussianaEstPol, 3)
+
+bptest(GaussianaEstPol)
+```
+                
+                
+                Normalidad de los residuos:
+                
+```{r Normalidad de Residuos Estabilidad Política}
+plot(GaussianaEstPol, 2)
+
+shapiro.test(GaussianaEstPol$residuals)
+```
+                
+                
+                No Multicolinealidad:
+                
+```{r No Multicolinealidad Estabilidad Política}
+vif(GaussianaEstPol)
+```
+                
+                
+                Valores influyentes:
+
+
+```{r Valores Influyentes Estabilidad Política}
+plot(GaussianaEstPol, 5)
+```
+
+
+ Gráficos: 
+
+```{r Librería ggplot}
+library(ggplot2)
+```
+
+  ### Gráfico para Migraciones Netas:
+   
+```{r Gráfico Migraciones}
+GráficoMigraNeta= ggplot(Migraciones, aes(x = Country_Name, 
+                                           y = `Migración_Neta_2024_(En_número_de_personas)`)) +
+  geom_col(fill = "steelblue") + 
+  theme_minimal() +
+  labs(title = "Migración Neta por País (2024)",
+       x = "País",
+       y = "Número de Personas") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5))
+
+GráficoMigraNeta
+```
+   
+   
+   Gráfico Para Estabilidad Política:
+   
+```{r Gráfico simple Estabilidad Política}
+ggplot(Migraciones, aes(x = `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`)) +
+  geom_histogram(bins = 208, fill = "orange", color = "black") +
+  theme_minimal() +
+  labs(title = "Distribución de Estabilidad Política",
+       x = "Número del País",
+       y = "Porcentaje de la estabilidad política")
+```
+   
+   
+   Gráfico para PBI:
+   
+```{r Gráfico Simple PBI}
+ggplot(Migraciones, aes(x = `PBI_en_Dólares_2024`, 
+                        y = `Migración_Neta_2024_(En_número_de_personas)`)) +
+  geom_point(color = "darkred", size = 3) +
+  geom_smooth(method = "lm", color = "blue", se = FALSE) +
+  theme_minimal() +
+  labs(x = "PBI (Dólares)", y = "Migración Neta")
+```
+   
+   
+   Gráfico sobre Población inactiva laboralmente:
+   
+   
+```{r Grafico Simple InacTrabajo}
+ggplot(Migraciones, aes(x = `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024`)) +
+  geom_histogram(bins = 208, fill = "red4", color = "yellow2") + 
+  theme_minimal() +
+  labs(title = "Distribución de Inactividad Laboral",
+       subtitle = "Histograma de Frecuencia",
+       y = "Porcentaje de Inactividad (%)",
+       x = "Númeo del país")
+```
+   
+   
+   
+    Gráfico sobre Población Apta para el trabajo que se encuentra inactiva:
+
+```{r Gráfico Corrleacioón InacTrabajo}
+GráficoInactividad = ggplot(Migraciones, aes(x = `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024`, 
+                        y = `Migración_Neta_2024_(En_número_de_personas)`)) +
+  geom_point(color = "steelblue", size = 3) +  
+  geom_smooth(method = "lm", color = "red", se = FALSE) + 
+  theme_minimal() +
+  labs(title = "Inactividad de población apta para el trabajo a partir de las migraciones netas \n en los países",
+       subtitle = "Gráfico de Dispersión con Línea de Regresión",
+       x = "Inactividad (%)",
+       y = "Migración Neta")
+  
+GráficoInactividad  
+```
+
+
+
+       Gráfico sobre Producto Bruto Interno (En dólares) en los estados:
+          
+```{r Gráfico Correlación PBI}
+GráficoPBI = ggplot(Migraciones, aes(x = `PBI_en_Dólares_2024`, 
+                        y = `Migración_Neta_2024_(En_número_de_personas)`)) +
+  geom_point(color = "darkred", size = 3) +
+  geom_smooth(method = "lm", color = "blue", se = FALSE) +
+  theme_minimal() +
+  labs(title = "RPBI de los países a partir de las migraciones netas",
+       x = "PBI (Dólares)",
+       y = "Migración Neta")
+
+GráficoPBI
+```
+
+
+  ### Gráfico sobre Establilidad Política 
+
+```{r Gráfico Correlación Estabilidad Política}
+GráficoEstPol = ggplot(Migraciones, aes(x = `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`, 
+                        y = `Migración_Neta_2024_(En_número_de_personas)`)) +
+  geom_point(color = "forestgreen", size = 3) +
+  geom_smooth(method = "lm", color = "orange", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Estabilidad Política en los estados \n a partir de las migraciones netas",
+       x = "Estabilidad Política (%)",
+       y = "Migración Neta")
+
+GráficoEstPol
+```
+
+
+Análisis Factorial Exploratorio:
+
+```{r}
+library(psych)
+```
+
+```{r}
+Factorial = c("Migración_Neta_2024_(En_número_de_personas)", 
+             "Inactividad_de_PoblaciónApta_Trabajo_en_%_2024", 
+             "PBI_en_Dólares_2024", 
+             "Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023")
+```
+
+```{r}
+DataFactorial = Migraciones[, Factorial]
+```
+
+```{r}
+DataFactorial = na.omit(DataFactorial)
+```
+
+        La matriz de correlación:
+        
+```{r}
+MatrizCorrelación = cor(DataFactorial)
+
+MatrizCorrelación
+```
+        Prueba de Kaiser Meyer:
+        
+```{r}
+KMO = KMO(DataFactorial)
+KMO
+```
+          Test de Barlett:
+```{r}
+Bartlett= cortest.bartlett(MatrizCorrelación, n = nrow(DataFactorial))
+Bartlett
+```
+
+```{r}
+library(matrixcalc)
+is.singular.matrix(MatrizCorrelación) 
+```
+        De ahí sigue el análisis paralelo: 
+        
+```{r}
+AnálisisParalelo =fa.parallel(DataFactorial, fa = "fa", correct = T, plot = T)
+```
+        
+```{r}
+ModeloFactorial = fa(DataFactorial, 
+               nfactors = 2, 
+               cor = 'mixed', 
+               rotate = "varimax",
+               fm = "minres")
+
+ModeloFactorial
+```
+
+
+
+Clusterización:
+
+
+```{r}
+library(cluster)
+library(factoextra)
+```
+
+
+```{r}
+PreparaciónCluster= c("Migración_Neta_2024_(En_número_de_personas)", 
+              "Inactividad_de_PoblaciónApta_Trabajo_en_%_2024", 
+              "PBI_en_Dólares_2024", 
+              "Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023")
+```
+
+```{r}
+DataCluster = Migraciones[, PreparaciónCluster]
+```
+
+```{r}
+rownames(DataCluster) = Migraciones$Country
+```
+
+
+Sigue la estandarización de coeficientes:
+
+```{r}
+DataEscalada = scale(DataCluster)
+```
+
+Para decidir el número de Clusters:
+
+```{r}
+fviz_nbclust(DataEscalada, pam, method = "wss") + 
+  labs(title = "Método del Codo (WSS)")
+```
+
+    Método de la silueta:
+    
+```{r}
+fviz_nbclust(DataEscalada, pam, method = "silhouette") + 
+  labs(title = "Método de la Silueta")
+```
+
+
+    
+```{r}
+Grupos = 4
+```
+    
+Se aplicará el cluster PAM
+
+```{r}
+set.seed(123) 
+PAM = pam(DataEscalada, k = Grupos)
+
+PAM
+```
+```{r}
+fviz_cluster(PAM, data = DataEscalada, 
+             ellipse.type = "convex",
+             main = "Cluster PAM")
+```
+
+Cluster AGNES: 
+
+```{r}
+AGNES = hcut(DataEscalada, 
+                 k = Grupos, 
+                 func_hclust = "agnes", 
+                 method = "ward.D2")
+```
+
+```{r}
+fviz_dend(AGNES, 
+          rect = TRUE,          
+          cex = 0.5,            
+          main = "Dendrograma AGNES (Ward)")
+```
+
+Cluster DIANA: 
+
+```{r}
+DIANA = hcut(DataEscalada, 
+                 k = Grupos, 
+                 func_hclust = "diana")
+```
+
+```{r}
+fviz_dend(DIANA, 
+          rect = TRUE, 
+          cex = 0.5,
+          main = "Dendrograma DIANA")
+```
+Comparación de clusters:
+
+```{r}
+fviz_silhouette(PAM) + labs(title = "Silueta PAM")
+
+fviz_silhouette(AGNES) + labs(title = "Silueta AGNES")
+
+fviz_silhouette(DIANA) + labs(title = "Silueta DIANA")
+```
+
+```{r}
+table(PAM = PAM$clustering, AGNES = AGNES$cluster)
+
+table(PAM = PAM$clustering, DIANA = DIANA$cluster)
+```
+

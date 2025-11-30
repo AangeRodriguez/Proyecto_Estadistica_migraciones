@@ -15,7 +15,7 @@ PBI_en_Dólares_2024 (Variable Numérica Continua): Mide, en el año 2024, en d�
 
 Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023 (Variable Numérica Continua): Mide en porcentaje, durante el año 2023, la estabilidad política y la ausencia de violencia dentro del país analizado. 
 
-Entrega Final
+# Entrega Final
 
 ```{r Librerías}
 library(rio)

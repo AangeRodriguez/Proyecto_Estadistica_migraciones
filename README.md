@@ -15,7 +15,6 @@ PBI_en_Dólares_2024 (Variable Numérica Continua): Mide, en el año 2024, en d�
 
 Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023 (Variable Numérica Continua): Mide en porcentaje, durante el año 2023, la estabilidad política y la ausencia de violencia dentro del país analizado. 
 
-
 ---
 title: "Entrega Final"
 output: html_document
@@ -374,55 +373,55 @@ GráficoEstPol
 
 Análisis Factorial Exploratorio:
 
-```{r}
+```{r Librería psych}
 library(psych)
 ```
 
-```{r}
+```{r Subdata Factorial}
 Factorial = c("Migración_Neta_2024_(En_número_de_personas)", 
              "Inactividad_de_PoblaciónApta_Trabajo_en_%_2024", 
              "PBI_en_Dólares_2024", 
              "Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023")
 ```
 
-```{r}
+```{r Data Factorial}
 DataFactorial = Migraciones[, Factorial]
 ```
 
-```{r}
+```{r Limpieza Data Factorial}
 DataFactorial = na.omit(DataFactorial)
 ```
 
         La matriz de correlación:
         
-```{r}
+```{r Matriz de Correlación}
 MatrizCorrelación = cor(DataFactorial)
 
 MatrizCorrelación
 ```
         Prueba de Kaiser Meyer:
         
-```{r}
+```{r Kaiser Meyer}
 KMO = KMO(DataFactorial)
 KMO
 ```
           Test de Barlett:
-```{r}
+```{r Test de Barlett}
 Bartlett= cortest.bartlett(MatrizCorrelación, n = nrow(DataFactorial))
 Bartlett
 ```
 
-```{r}
+```{r Verificación Matriz}
 library(matrixcalc)
 is.singular.matrix(MatrizCorrelación) 
 ```
         De ahí sigue el análisis paralelo: 
         
-```{r}
+```{r Análisis Paralelo}
 AnálisisParalelo =fa.parallel(DataFactorial, fa = "fa", correct = T, plot = T)
 ```
         
-```{r}
+```{r Modelo Factorial}
 ModeloFactorial = fa(DataFactorial, 
                nfactors = 2, 
                cor = 'mixed', 
@@ -437,63 +436,63 @@ ModeloFactorial
 Clusterización:
 
 
-```{r}
+```{r Librería Clusterización}
 library(cluster)
 library(factoextra)
 ```
 
 
-```{r}
+```{r Subdata Cluster}
 PreparaciónCluster= c("Migración_Neta_2024_(En_número_de_personas)", 
               "Inactividad_de_PoblaciónApta_Trabajo_en_%_2024", 
               "PBI_en_Dólares_2024", 
               "Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023")
 ```
 
-```{r}
+```{r Data Cluster}
 DataCluster = Migraciones[, PreparaciónCluster]
 ```
 
-```{r}
+```{r Rownames Cluster}
 rownames(DataCluster) = Migraciones$Country
 ```
 
 
 Sigue la estandarización de coeficientes:
 
-```{r}
+```{r Data escalada}
 DataEscalada = scale(DataCluster)
 ```
 
 Para decidir el número de Clusters:
 
-```{r}
+```{r Número de Clústers}
 fviz_nbclust(DataEscalada, pam, method = "wss") + 
   labs(title = "Método del Codo (WSS)")
 ```
 
     Método de la silueta:
     
-```{r}
+```{r Silueta PAM}
 fviz_nbclust(DataEscalada, pam, method = "silhouette") + 
   labs(title = "Método de la Silueta")
 ```
 
 
     
-```{r}
+```{r Grupos}
 Grupos = 4
 ```
     
 Se aplicará el cluster PAM
 
-```{r}
+```{r Cluster PAM}
 set.seed(123) 
 PAM = pam(DataEscalada, k = Grupos)
 
 PAM
 ```
-```{r}
+```{r Gráfico PAM}
 fviz_cluster(PAM, data = DataEscalada, 
              ellipse.type = "convex",
              main = "Cluster PAM")
@@ -501,14 +500,14 @@ fviz_cluster(PAM, data = DataEscalada,
 
 Cluster AGNES: 
 
-```{r}
+```{r Cluster AGNES}
 AGNES = hcut(DataEscalada, 
                  k = Grupos, 
                  func_hclust = "agnes", 
                  method = "ward.D2")
 ```
 
-```{r}
+```{r Gráfico AGNES}
 fviz_dend(AGNES, 
           rect = TRUE,          
           cex = 0.5,            
@@ -517,13 +516,13 @@ fviz_dend(AGNES,
 
 Cluster DIANA: 
 
-```{r}
+```{r Cluster DIANA}
 DIANA = hcut(DataEscalada, 
                  k = Grupos, 
                  func_hclust = "diana")
 ```
 
-```{r}
+```{r Gráfico DIANA}
 fviz_dend(DIANA, 
           rect = TRUE, 
           cex = 0.5,
@@ -531,7 +530,7 @@ fviz_dend(DIANA,
 ```
 Comparación de clusters:
 
-```{r}
+```{r Comparación Siluetas}
 fviz_silhouette(PAM) + labs(title = "Silueta PAM")
 
 fviz_silhouette(AGNES) + labs(title = "Silueta AGNES")
@@ -539,8 +538,12 @@ fviz_silhouette(AGNES) + labs(title = "Silueta AGNES")
 fviz_silhouette(DIANA) + labs(title = "Silueta DIANA")
 ```
 
-```{r}
+```{r Tabla Comparación}
 table(PAM = PAM$clustering, AGNES = AGNES$cluster)
+
+table(PAM = PAM$clustering, DIANA = DIANA$cluster)
+```
+
 
 table(PAM = PAM$clustering, DIANA = DIANA$cluster)
 ```

@@ -1,7 +1,9 @@
 # Proyecto_Estadistica_migraciones
 
+# Link Dashboard
+https://rpubs.com/aangerodriguez/1374880
 
-Diccionario de datos:
+# Diccionario de datos:
 
 Country_Name (Variable Nominal): Es la variable que se utilizará como unidad de análisis, contiene el nombre de los países analizados.
 

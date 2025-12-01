@@ -326,7 +326,6 @@ GráficoInactividad = ggplot(Migraciones, aes(x = `Inactividad_de_PoblaciónApta
   geom_smooth(method = "lm", color = "red", se = FALSE) + 
   theme_minimal() +
   labs(title = "Inactividad de población apta para el trabajo a partir de las migraciones netas \n en los países",
-       subtitle = "Gráfico de Dispersión con Línea de Regresión",
        x = "Inactividad (%)",
        y = "Migración Neta")
   
@@ -343,7 +342,7 @@ GráficoPBI = ggplot(Migraciones, aes(x = `PBI_en_Dólares_2024`,
   geom_point(color = "darkred", size = 3) +
   geom_smooth(method = "lm", color = "blue", se = FALSE) +
   theme_minimal() +
-  labs(title = "RPBI de los países a partir de las migraciones netas",
+  labs(title = "PBI de los países a partir de las migraciones netas",
        x = "PBI (Dólares)",
        y = "Migración Neta")
 
@@ -364,6 +363,21 @@ GráficoEstPol = ggplot(Migraciones, aes(x = `Estabilidad_política_y_ausencia_d
        y = "Migración Neta")
 
 GráficoEstPol
+```
+
+### Gráfico de Correlación entre Inactividad laboral y estabilidad política:
+
+```{r}
+GráficoInacEstPol = ggplot(Migraciones, aes(x = `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`, 
+                        y = `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024`)) +
+  geom_point(color = "blue4", size = 3) +
+  geom_smooth(method = "lm", color = "orange", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Estabilidad Política en los estados \n a partir de la inactividad de personas aptas para trabajar",
+       x = "Estabilidad Política (%)",
+       y = "Inactividad Laboral")
+
+GráficoInacEstPol
 ```
 
 
@@ -425,6 +439,16 @@ ModeloFactorial = fa(DataFactorial,
                fm = "minres")
 
 ModeloFactorial
+```
+
+```{r}
+DiagramaEstructural = fa.diagram(ModeloFactorial, 
+           main = "Diagrama del Modelo Factorial", 
+           digits = 2,                             
+           cut = 0.3,                              
+           simple = FALSE)
+
+DiagramaEstructural
 ```
 
 
@@ -541,6 +565,4 @@ table(PAM = PAM$clustering, DIANA = DIANA$cluster)
 ```
 
 
-table(PAM = PAM$clustering, DIANA = DIANA$cluster)
-```
 

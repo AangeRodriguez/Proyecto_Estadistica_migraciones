@@ -633,6 +633,12 @@ Bartlett= cortest.bartlett(MatrizCorrelación, n = nrow(DataFactorial))
 Bartlett
 ```
 
+```{r Eigenvalues}
+scree(DataFactorial, main = "Scree Plot de Eigenvalues")
+abline(h = 1, col = "red", lty = 2)
+```
+
+
 ```{r Verificación Matriz}
 library(matrixcalc)
 is.singular.matrix(MatrizCorrelación) 
@@ -724,6 +730,12 @@ PAM = pam(DataEscalada, k = Grupos)
 
 PAM
 ```
+```{r Número óptimo de conglomerados silueta}
+fviz_nbclust(DataEscalada, pam, method = "silhouette") +
+  labs(title = "Método de la Silueta (Número Óptimo de conglomerados")
+```
+
+
 ```{r Gráfico PAM}
 fviz_cluster(PAM, data = DataEscalada, 
              ellipse.type = "convex",

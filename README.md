@@ -19,19 +19,190 @@ Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023 (Variable Num
 
 # Entrega Final
 
-```{r Librerías}
+---
+title: "Entrega Final"
+output: html_document
+date: "2025-11-29"
+---
+
+```{r}
 library(rio)
 library(dplyr)
-
 ```
 
-```{r Importar la Data}
-Migraciones = import("Migraciones_2024.xlsx")
+
+Limpieza de datos: 
+
+```{r}
+Migra = import("Migra.xls")
 ```
 
-```{r STR}
+```{r}
+Migra = Migra[-c(1:2), ]
+```
+
+```{r}
+colnames(Migra) = Migra[1, ]
+```
+
+```{r}
+Migra = Migra[-1, ]
+```
+
+```{r}
+InacPol = import("InactivPob.xls")
+```
+```{r}
+InacPol = InacPol[-c(1:2), ]
+```
+
+```{r}
+colnames(InacPol) = InacPol[1, ]
+```
+
+```{r}
+InacPol = InacPol[-1, ]
+```
+
+```{r}
+PBI = import("PBI.xls")
+```
+
+```{r}
+PBI = PBI[-c(1:2), ]
+```
+
+```{r}
+colnames(PBI) = PBI[1, ]
+```
+
+```{r}
+PBI = PBI[-1, ]
+```
+
+```{r}
+Estabilidad = import("Estabilidad.xls")
+```
+
+```{r}
+Estabilidad = Estabilidad[-c(1:2), ]
+```
+
+```{r}
+colnames(Estabilidad) = Estabilidad[1, ]
+```
+
+```{r}
+Estabilidad = Estabilidad[-1, ]
+```
+
+Filtración de las variables a utilizar:
+
+
+```{r}
+Migra = select(Migra, `Country Name`, `Country Code`, `2024`)
+```
+
+```{r}
+InacPol = select(InacPol, `Country Name`, `Country Code`, `2024`)
+```
+
+```{r}
+PBI = select(PBI, `Country Name`, `Country Code`, `2024`)
+```
+
+```{r}
+Estabilidad = select(Estabilidad, `Country Name`, `Country Code`, `2023`)
+```
+
+Cambio de Nombre
+
+```{r}
+Migra = rename(Migra, Migracion_Neta_2024 = `2024`)
+```
+
+```{r}
+InacPol = rename(InacPol, Población_Inactiva_Trabajo_Porcentaje_2024 = `2024`)
+```
+
+```{r}
+PBI = rename(PBI, PBI_en_Dólares_2024 = `2024`)
+```
+
+```{r}
+Estabilidad = rename(Estabilidad, Estabilidad_Política_Porcentaje_2023 = `2023`)
+```
+
+Unión de la data: 
+
+```{r}
+Migraciones = merge(Migra, InacPol, by = c("Country Code"), all = TRUE)
+```
+
+```{r}
+Migraciones = merge(Migraciones, PBI, by = "Country Code", all = TRUE)
+```
+
+```{r}
+Migraciones = merge(Migraciones, Estabilidad, by = "Country Code", all = TRUE)
+```
+
+Limpieza Final Data:
+
+```{r}
+Migraciones = select(Migraciones, "Country Code", "Country Name.x", "Migracion_Neta_2024", "Población_Inactiva_Trabajo_Porcentaje_2024", "PBI_en_Dólares_2024", "Estabilidad_Política_Porcentaje_2023")
+```
+
+```{r}
+Migraciones = Migraciones[-c(2, 4, 8, 35, 37, 45, 50, 62, 63, 64, 65, 66, 69, 74, 75, 80, 96, 97, 99, 103, 104, 105, 106, 108, 111, 129, 130, 135, 136, 137, 139, 140, 141, 143, 147, 148, 154, 157, 162, 171, 182, 184, 192, 197, 198, 199, 200, 205, 216, 218, 219, 226, 229, 231, 232, 237, 239, 241, 242, 250, 260),]
+```
+
+
+```{r}
+Migraciones = Migraciones %>%
+  mutate(`Migracion_Neta_2024` = as.numeric(`Migracion_Neta_2024`))
+```
+
+```{r}
+Migraciones = Migraciones %>%
+  mutate(`Población_Inactiva_Trabajo_Porcentaje_2024` = as.numeric(`Población_Inactiva_Trabajo_Porcentaje_2024`))
+```
+
+
+```{r}
+Migraciones = Migraciones %>%
+  mutate(`PBI_en_Dólares_2024` = as.numeric(`PBI_en_Dólares_2024`))
+```
+
+
+```{r}
+Migraciones = Migraciones %>%
+  mutate(`Estabilidad_Política_Porcentaje_2023` = as.numeric(`Estabilidad_Política_Porcentaje_2023`))
+```
+
+
+```{r}
 str(Migraciones)
 ```
+último cambio de nombre a las variables: 
+
+```{r}
+Migraciones = rename(Migraciones, `Migración_Neta_2024_(En_número_de_personas)` = Migracion_Neta_2024)
+```
+
+```{r}
+Migraciones = rename(Migraciones, `Country Name` = `Country Name.x`)
+```
+
+```{r}
+Migraciones = rename(Migraciones, `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023` = `Estabilidad_Política_Porcentaje_2023`)
+```
+
+```{r}
+Migraciones = rename(Migraciones, `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024` = `Población_Inactiva_Trabajo_Porcentaje_2024`)
+```
+
+Cubrir datos faltantes: 
 
 ```{r Media de PBI}
 mediaPBI = mean(Migraciones$PBI_en_Dólares_2024,na.rm = TRUE)
@@ -267,7 +438,7 @@ library(ggplot2)
   ### Gráfico para Migraciones Netas:
    
 ```{r Gráfico Migraciones}
-GráficoMigraNeta= ggplot(Migraciones, aes(x = Country_Name, 
+GráficoMigraNeta= ggplot(Migraciones, aes(x = `Country Name`, 
                                            y = `Migración_Neta_2024_(En_número_de_personas)`)) +
   geom_col(fill = "steelblue") + 
   theme_minimal() +
@@ -476,7 +647,7 @@ DataCluster = Migraciones[, PreparaciónCluster]
 ```
 
 ```{r Rownames Cluster}
-rownames(DataCluster) = Migraciones$Country
+rownames(DataCluster) = Migraciones$`Country Name`
 ```
 
 

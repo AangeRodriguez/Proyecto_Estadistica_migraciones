@@ -610,7 +610,7 @@ MatrizCorrelación
 ```
        Gráfico de Correlaciones:
        
-```{r}
+```{r Gráfico de Correlación}
 corrplot(MatrizCorrelación, 
          method = "circle",     
          type = "upper",          
@@ -790,7 +790,5 @@ table(PAM = PAM$clustering, AGNES = AGNES$cluster)
 
 table(PAM = PAM$clustering, DIANA = DIANA$cluster)
 ```
-
-
 
 

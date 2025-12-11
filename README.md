@@ -19,12 +19,6 @@ Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023 (Variable Num
 
 # Entrega Final
 
----
-title: "Entrega Final"
-output: html_document
-date: "2025-11-29"
----
-
 ```{r}
 library(rio)
 library(dplyr)
@@ -450,6 +444,21 @@ GráficoMigraNeta= ggplot(Migraciones, aes(x = `Country Name`,
 GráficoMigraNeta
 ```
    
+
+Tabla de comparación R-ajustado:
+
+```{r Tabla de comparación R Ajustado}
+TablaResumen = data.frame(
+  TablaModelo = c("Migración Neta", "Inactividad Laboral", "PBI", "Estabilidad política"),
+  RAjustado = c(summary(Gaussiana)$adj.r.squared,
+                 summary(GaussianaTrabajo)$adj.r.squared,
+                 summary(GaussianaPBI)$adj.r.squared,
+                 summary(GaussianaEstPol)$adj.r.squared)
+)
+
+TablaResumen
+```
+La regresión que tiene a Estabilidad Política como variable dependiente resulta la más explicativa. Posee el mayor valor de R ajustado. 
    
    Gráfico Para Estabilidad Política:
    
@@ -466,12 +475,13 @@ ggplot(Migraciones, aes(x = `Estabilidad_política_y_ausencia_de_violencia/terro
    Gráfico para PBI:
    
 ```{r Gráfico Simple PBI}
-ggplot(Migraciones, aes(x = `PBI_en_Dólares_2024`, 
-                        y = `Migración_Neta_2024_(En_número_de_personas)`)) +
-  geom_point(color = "darkred", size = 3) +
-  geom_smooth(method = "lm", color = "blue", se = FALSE) +
+ggplot(Migraciones, aes(x = `Country Name`, y = `PBI_en_Dólares_2024`)) +
+  geom_col(fill = "darkred") +
   theme_minimal() +
-  labs(x = "PBI (Dólares)", y = "Migración Neta")
+  labs(title = "Distribución del PBI por País (2024)",
+       x = "País",
+       y = "PBI (Dólares)") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5))
 ```
    
    
@@ -492,7 +502,7 @@ ggplot(Migraciones, aes(x = `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024`)) 
    
     Gráfico sobre Población Apta para el trabajo que se encuentra inactiva:
 
-```{r Gráfico Corrleacioón InacTrabajo}
+```{r Gráfico Corrleación InacTrabajo}
 GráficoInactividad = ggplot(Migraciones, aes(x = `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024`, 
                         y = `Migración_Neta_2024_(En_número_de_personas)`)) +
   geom_point(color = "steelblue", size = 3) +  
@@ -540,7 +550,7 @@ GráficoEstPol
 
 ### Gráfico de Correlación entre Inactividad laboral y estabilidad política:
 
-```{r}
+```{r Gráfico Correlación Estabilidad Política e Inactividad Laboral}
 GráficoInacEstPol = ggplot(Migraciones, aes(x = `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`, 
                         y = `Inactividad_de_PoblaciónApta_Trabajo_en_%_2024`)) +
   geom_point(color = "blue4", size = 3) +
@@ -553,11 +563,27 @@ GráficoInacEstPol = ggplot(Migraciones, aes(x = `Estabilidad_política_y_ausenc
 GráficoInacEstPol
 ```
 
+  Gráfico sobre Estabilidad Política y PBI:
+  
+```{r Gráfico Correlación Estabilidad Política y PBI}
+GráficoPBIEstPol = ggplot(Migraciones, aes(x = `Estabilidad_política_y_ausencia_de_violencia/terrorismo_en_%_2023`, 
+                                           y = `PBI_en_Dólares_2024`)) +
+  geom_point(color = "orange3", size = 3) +
+  geom_smooth(method = "lm", color = "black", se = FALSE) +
+  theme_minimal() +
+  labs(title = "PBI en los estados \n a partir de la Estabilidad Política",
+       x = "Estabilidad Política (%)",
+       y = "PBI (Dólares)")
+
+GráficoPBIEstPol
+```
+  
 
 Análisis Factorial Exploratorio:
 
-```{r Librería psych}
+```{r Librería Factorial}
 library(psych)
+library(corrplot)
 ```
 
 ```{r Subdata Factorial}
@@ -582,6 +608,19 @@ MatrizCorrelación = cor(DataFactorial)
 
 MatrizCorrelación
 ```
+       Gráfico de Correlaciones:
+       
+```{r}
+corrplot(MatrizCorrelación, 
+         method = "circle",     
+         type = "upper",          
+         addCoef.col = "black",   
+         tl.col = "black",        
+         tl.cex = 0.5,            
+         diag = FALSE)
+```
+       
+       
         Prueba de Kaiser Meyer:
         
 ```{r Kaiser Meyer}
@@ -721,21 +760,37 @@ fviz_dend(DIANA,
           cex = 0.5,
           main = "Dendrograma DIANA")
 ```
-Comparación de clusters:
+Comparación de Siluetas:
 
-```{r Comparación Siluetas}
-fviz_silhouette(PAM) + labs(title = "Silueta PAM")
-
-fviz_silhouette(AGNES) + labs(title = "Silueta AGNES")
-
-fviz_silhouette(DIANA) + labs(title = "Silueta DIANA")
+```{r Silueta PAM}
+fviz_silhouette(PAM, print.summary = FALSE) + 
+  labs(title = "Silueta PAM")
 ```
+
+Silueta AGNES: 
+
+Silueta AGNES:
+
+```{r Silueta AGNES}
+fviz_silhouette(AGNES, print.summary = FALSE) + 
+  labs(title = "Silueta AGNES (Ward)")
+```
+
+Silueta DIANA:  
+
+```{r Silueta DIANA}
+fviz_silhouette(DIANA, print.summary = FALSE) + 
+  labs(title = "Silueta DIANA (Divisivo)")
+```
+
+Tabla Comparación de asignación de clústeres:
 
 ```{r Tabla Comparación}
 table(PAM = PAM$clustering, AGNES = AGNES$cluster)
 
 table(PAM = PAM$clustering, DIANA = DIANA$cluster)
 ```
+
 
 
 
